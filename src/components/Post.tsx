@@ -36,7 +36,7 @@ interface PostProps {
 }
 
 export const Post = ({ post }: PostProps) => {
-  const [comments, setComments] = useState([''])
+  const [comments, setComments] = useState([])
   const [newCommentText, setNewCommentText] = useState('')
 
   const publishedDateFormated = format(post.publishedAt, "d 'de' LLLL 'às' HH:mm'h'", {
@@ -48,11 +48,19 @@ export const Post = ({ post }: PostProps) => {
     addSuffix: true
   })
 
-  const handleCreateNewComment = (event: FormEvent) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault(); // Impede que a quebra de linha seja inserida no campo de texto
+      handleCreateNewComment(event); // Envia o formulário
+    }
+  }
+
+  const handleCreateNewComment = (event: FormEvent<HTMLTextAreaElement>) => {
     event.preventDefault()
     // const newCommentText = event.target.comment.value
     setComments([...comments, newCommentText])
     setNewCommentText('')
+    event.currentTarget.blur()
   }
 
   const handleNewCommentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -104,6 +112,7 @@ export const Post = ({ post }: PostProps) => {
           onChange={handleNewCommentChange}
           name='comment'
           placeholder='Deixe um comentário'
+          onKeyDown={handleKeyDown}
         />
         <footer>
           <button disabled={isNewCommentEmpty} type='submit'>Publicar</button>
